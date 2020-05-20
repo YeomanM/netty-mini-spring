@@ -1,5 +1,7 @@
 package com.yeoman.minispring;
 
+import com.yeoman.minispring.support.ScanPackageHelper;
+
 /**
  * @author 冯宇明
  * @version 1.0
@@ -9,7 +11,7 @@ package com.yeoman.minispring;
 public class MiniSpringStarter {
 
     public static void main(String[] args) {
-
+        ScanPackageHelper.scan(MiniSpringStarter.class.getPackage().getName()).forEach( System.out::println);
     }
 
 }
