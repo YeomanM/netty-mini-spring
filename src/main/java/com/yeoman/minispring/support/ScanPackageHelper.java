@@ -57,7 +57,7 @@ public class ScanPackageHelper {
                     String parentDir = URLDecoder.decode(parent.getFile(), "UTF-8");
                     result.addAll(ScanPackageHelper.scanFile(parentDir, filter, dir));
                 } else if (protocol.equalsIgnoreCase(jar)) {
-
+                    result.addAll(ScanPackageHelper.scanJar(parent, fileDir));
                 }
             }
 
@@ -67,8 +67,9 @@ public class ScanPackageHelper {
         return result;
     }
 
-    private static List<String> scanJar(URL parent) {
+    private static List<String> scanJar(URL parent,String parentDir) {
         JarFile jarFile = null;
+        List<String> result = new ArrayList<>();
 
         try {
             jarFile = ((JarURLConnection) parent.openConnection()).getJarFile();
@@ -77,13 +78,24 @@ public class ScanPackageHelper {
             JarEntry entry;
             while (entries.hasMoreElements()) {
                 entry = entries.nextElement();
-                System.out.println(entry.getName());
+                String name = entry.getName();
+
+                if (name.charAt(0) == '/') {
+                    name = name.substring(1);
+                }
+
+                if (name.startsWith(parentDir)) {
+                    if (name.endsWith(".class") && !entry.isDirectory()) {
+                        result.add(name.replaceAll("/", "."));
+                    }
+                }
+
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return result;
     }
 
     private static List<String> scanFile(String parentDir, Filter filter, String preDir) {

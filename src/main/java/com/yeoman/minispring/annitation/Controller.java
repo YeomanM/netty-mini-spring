@@ -13,6 +13,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Controller {
 
-    String value();
+    String value() default "";
 
 }
