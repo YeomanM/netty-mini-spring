@@ -29,6 +29,7 @@ public class MinispringUtil {
     private static Map<String, String> nameMap = new HashMap<>();
     private static Map<String, Method> urlMethodMap = new HashMap<>();
     private static Map<Method, String> methodPackageMap = new HashMap<>();
+    private static Map<String, String> urlRequestMethodMap = new HashMap<>();
 
     public static void init(Class clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         Object tmp = YamlUtil.get(BASE_PACKAGE_KEY_WORD);
@@ -41,9 +42,7 @@ public class MinispringUtil {
         packageNames = ScanPackageHelper.scan(basePackage);
         instance();
         ioc();
-
-
-
+        urlMapping();
     }
 
     private static void instance() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
@@ -91,6 +90,35 @@ public class MinispringUtil {
                     field.setAccessible(false);
                 }
             }
+        }
+    }
+
+    private static void urlMapping() throws ClassNotFoundException {
+        Class c;
+        for (String packageName : packageNames) {
+            c = Class.forName(packageName);
+
+            if (c.isAnnotationPresent(Controller.class)) {
+                String preUrl = "", url;
+                if (c.isAnnotationPresent(RequestMapping.class)) {
+                    RequestMapping parent = (RequestMapping) c.getAnnotation(RequestMapping.class);
+                    preUrl = parent.value();
+                }
+
+                Method[] methods = c.getDeclaredMethods();
+                RequestMapping child;
+                for (Method method : methods) {
+                    if (method.isAnnotationPresent(RequestMapping.class)) {
+                        child = method.getAnnotation(RequestMapping.class);
+                        url = preUrl + child.value();
+                        urlMethodMap.put(url, method);
+                        methodPackageMap.put(method, packageName);
+                        urlRequestMethodMap.put(url, child.methods());
+                    }
+                }
+
+            }
+
         }
     }
 

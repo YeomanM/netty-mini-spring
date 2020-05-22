@@ -33,5 +33,15 @@ public class YamlUtil {
         return params.get(key);
     }
 
+    public static Object getOrDefault(String key, Object o) {
+        if (!handler) {
+            synchronized (handler) {
+                handler = true;
+                init();
+            }
+        }
+        return params.getOrDefault(key, o);
+    }
+
 
 }
