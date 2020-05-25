@@ -19,6 +19,13 @@
             <version>4.1.50.Final</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.kohsuke/asm4 -->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>asm4</artifactId>
+            <version>4.0</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
         <dependency>
