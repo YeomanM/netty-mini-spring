@@ -8,13 +8,9 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
-import io.netty.util.concurrent.Future;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author 冯宇明
@@ -57,6 +53,7 @@ public class MiniSpringStarter {
         int port = (int) YamlUtil.getOrDefault("server.port", 9999);
         try {
             System.out.println("starting....");
+            System.out.println("started port " + port);
             ChannelFuture f = b.bind(port).sync();
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {

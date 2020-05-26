@@ -13,9 +13,10 @@ import jdk.internal.org.objectweb.asm.*;
  * @author 冯宇明
  * @version 1.0
  * @date 2020/5/25
- * @desc
+ * @desc 遍历参数
  */
 public class ScanParamHelper {
+
 
     public static String[] getMethodParameterNamesByAsm4(Class<?> clazz, final Method method) throws IOException {
 
@@ -26,6 +27,7 @@ public class ScanParamHelper {
         final Type[] types = new Type[paramsType.length];
         for (int i = 0; i < paramsType.length; i++) {
             types[i] = Type.getType(paramsType[i]);
+            System.out.println(types[i].getClassName());
         }
 
         final String[] names = new String[types.length];
@@ -40,7 +42,7 @@ public class ScanParamHelper {
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 
                 Type[] argTypes = Type.getArgumentTypes(desc);
-                if (!method.getName().equalsIgnoreCase(name) || !Arrays.equals(argTypes, types)) {
+                if (!method.getName().equalsIgnoreCase(name) || !same(argTypes, types)) {
                     return null;
                 }
 
@@ -48,15 +50,31 @@ public class ScanParamHelper {
                     @Override
                     public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
                         if (Modifier.isStatic(method.getModifiers())) {
-                            names[index] = name;
+                            if (index < names.length && index >= 0) {
+                                names[index] = name;
+                            }
                         } else {
-                            names[index - 1] = name;
+                            if (index <= names.length && index > 0) {
+                                names[index - 1] = name;
+                            }
                         }
                     }
                 };
             }
         }, 0);
         return names;
+    }
+
+    private static boolean same(Type[] types, Type[] originTypes) {
+        if (!Arrays.equals(originTypes, types)){
+            return false;
+        }
+        for (int i = 0, len = types.length; i < len; i++) {
+            if (!types[i].getClassName().equalsIgnoreCase(originTypes[i].getClassName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void main(String[] args) throws IOException {
@@ -69,6 +87,7 @@ public class ScanParamHelper {
                 break;
             }
         }
+
         String[] ss = ScanParamHelper.getMethodParameterNamesByAsm4(c, method);
         for (String s : ss) {
             System.out.println(s);
