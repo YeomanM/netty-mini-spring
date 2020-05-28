@@ -1,7 +1,9 @@
 package com.yeoman.minispring.handler;
 
+import com.yeoman.minispring.support.http.handler.HttpAccess;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -27,42 +29,10 @@ public class DispatcherServlet extends ChannelInboundHandlerAdapter {
 
         if (msg instanceof FullHttpRequest) {
             FullHttpRequest request = (FullHttpRequest) msg;
-            String contentType = request.headers().get("Content-type").trim();
-            System.out.println(contentType);
-            ByteBuf str = request.content();
-            String reqUrl = request.uri();
-            HttpMethod method = request.method();
-//            h(request);
-            System.out.println(reqUrl);
-            System.out.println(method.name());
-            System.out.println("=======================end=========================");
+            new Thread(new HttpAccess(request, ctx.channel())).start();
+            System.out.println("I cannot wait response!");
         }
-
-//        super.channelRead(ctx, msg);
-        responsePush(ctx, "[\"收到了\"]".getBytes(StandardCharsets.UTF_8));
     }
-
-    public void h(FullHttpRequest request) throws IOException {
-
-//        HttpPostMultipartRequestDecoder decoder = new HttpPostMultipartRequestDecoder(request);
-        HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(request);
-        while (decoder.hasNext()) {
-            InterfaceHttpData data = decoder.next();
-            if (data instanceof Attribute) {
-                Attribute attribute = (Attribute) data;
-
-                System.out.println("收到mutlipart属性：" + attribute);
-            } else if (data instanceof FileUpload){
-                FileUpload upload = (FileUpload) data;
-                System.out.println("收到multipart文件：" + upload);
-            }
-        }
-        decoder.destroy();
-    }
-
-    private HttpHeaders headers;
-    private HttpRequest request;
-    private FullHttpRequest fullRequest;
 
     private static final String FAVICON_ICO = "/favicon.ico";
     private static final AsciiString CONTENT_TYPE = AsciiString.of("Content-Type");
@@ -76,7 +46,7 @@ public class DispatcherServlet extends ChannelInboundHandlerAdapter {
     private static final AsciiString ACCESS_CONTROL_ALLOW_CREDENTIALS = AsciiString.of("Access-Control-Allow-Credentials");
 
 
-    private void responsePush(ChannelHandlerContext ctx, byte[] content) {
+    public static void responsePush(Channel ctx, byte[] content) {
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(content));
         // 允许跨域访问
         response.headers().set(CONTENT_TYPE, "application/json;charset=UTF-8");

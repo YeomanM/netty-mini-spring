@@ -1,6 +1,7 @@
 package com.yeoman.minispring.support.request;
 
 import com.yeoman.minispring.support.AbstractReqParamHelper;
+import com.yeoman.minispring.support.model.HttpMultipartFile;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.multipart.*;
 
@@ -16,16 +17,7 @@ import java.util.Map;
  */
 public class FormReqParamHelper extends AbstractReqParamHelper {
     @Override
-    public Object[] getReqParamValueByListParamName(FullHttpRequest request, String[] names) {
-        int length;
-        if (names == null || (length = names.length) == 0) {
-            return new Object[0];
-        }
-        Object[] values = new Object[length];
-        Map<String, Integer> name2Index = new HashMap<>(length);
-        for (int i = 0; i < length; i++) {
-            name2Index.put(names[i], i);
-        }
+    protected void getReqParamValueByListParamName(FullHttpRequest request, String[] names) {
 
         HttpPostMultipartRequestDecoder decoder = null;
         try {
@@ -40,16 +32,22 @@ public class FormReqParamHelper extends AbstractReqParamHelper {
                 if (data instanceof Attribute) {
                     attribute = (Attribute) data;
                     k = attribute.getName();
-                    index = name2Index.getOrDefault(k, -1);
-                    if (index < 0) {
-                        continue;
-                    }
-                    values[index] = attribute.getValue();
+                    super.setValue(k, attribute.getValue());
                 } else if (data instanceof FileUpload) {
                     fileUpload = (FileUpload) data;
-                    fileUpload.get()
+
+                    if (needSet(fileUpload.getName())) {
+                        HttpMultipartFile file = new HttpMultipartFile();
+                        file.setContent(fileUpload.get());
+                        file.setOriginName(fileUpload.getFilename());
+                        file.setName(fileUpload.getName());
+                        file.setCharset(fileUpload.getCharset());
+                        file.setLength(fileUpload.length());
+                        super.setValue(file.getName(), file);
+                    }
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -57,6 +55,5 @@ public class FormReqParamHelper extends AbstractReqParamHelper {
                 decoder.destroy();
             }
         }
-
     }
 }

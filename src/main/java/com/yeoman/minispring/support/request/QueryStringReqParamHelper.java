@@ -2,6 +2,10 @@ package com.yeoman.minispring.support.request;
 
 import com.yeoman.minispring.support.AbstractReqParamHelper;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 冯宇明
@@ -11,7 +15,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
  */
 public class QueryStringReqParamHelper extends AbstractReqParamHelper {
     @Override
-    public Object[] getReqParamValueByListParamName(FullHttpRequest request, String[] names) {
-        return new Object[0];
+    protected void getReqParamValueByListParamName(FullHttpRequest request, String[] names) {
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+        Map<String, List<String>> params = decoder.parameters();
+        for (String name : names) {
+            super.setValue(name, params.getOrDefault(name, null));
+        }
     }
 }

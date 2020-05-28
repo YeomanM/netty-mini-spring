@@ -8,6 +8,9 @@ import com.yeoman.minispring.support.request.QueryStringReqParamHelper;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author 冯宇明
  * @version 1.0
@@ -16,6 +19,34 @@ import io.netty.handler.codec.http.HttpMethod;
  */
 public abstract class AbstractReqParamHelper {
 
+    private Object[] values;
+    private Map<String, Integer> name2Index;
+
+    public Object[] getReqParamValueByArrayParamName(FullHttpRequest request, String[] names) {
+        int length;
+        if (names == null || (length = names.length) == 0) {
+            return new Object[0];
+        }
+        values = new Object[length];
+        name2Index = new HashMap<>(length);
+        for (int i = 0; i < length; i++) {
+            name2Index.put(names[i], i);
+        }
+        getReqParamValueByListParamName(request, names);
+        return values;
+    }
+
+    public void setValue(String name, Object value) {
+        int index = name2Index.getOrDefault(name, -1);
+        if (index >= 0) {
+            values[index] = value;
+        }
+    }
+
+    public boolean needSet(String name) {
+        return name2Index.containsKey(name);
+    }
+
     /**
      * 根据参数名称获取请求参数的值
      *
@@ -23,7 +54,7 @@ public abstract class AbstractReqParamHelper {
      * @param names 参数名称列表
      * @return 值对应的列表
      */
-    public abstract Object[] getReqParamValueByListParamName(FullHttpRequest request, String[] names);
+    protected abstract void getReqParamValueByListParamName(FullHttpRequest request, String[] names);
 
     public static AbstractReqParamHelper getInstance(FullHttpRequest request) {
         String contentType = request.headers().get("Content-type").replaceAll(" ", "");
