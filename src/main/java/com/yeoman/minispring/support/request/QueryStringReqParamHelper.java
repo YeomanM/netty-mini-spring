@@ -16,10 +16,12 @@ import java.util.Map;
 public class QueryStringReqParamHelper extends AbstractReqParamHelper {
     @Override
     protected void getReqParamValueByListParamName(FullHttpRequest request, String[] names) {
+        System.out.println(request.uri());
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> params = decoder.parameters();
         for (String name : names) {
             super.setValue(name, params.getOrDefault(name, null));
         }
+        System.out.println(params);
     }
 }

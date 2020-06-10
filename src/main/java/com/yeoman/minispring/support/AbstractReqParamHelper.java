@@ -57,8 +57,13 @@ public abstract class AbstractReqParamHelper {
     protected abstract void getReqParamValueByListParamName(FullHttpRequest request, String[] names);
 
     public static AbstractReqParamHelper getInstance(FullHttpRequest request) {
-        String contentType = request.headers().get("Content-type").replaceAll(" ", "");
+        String contentType = request.headers().get("Content-type");
         String method = request.method().name();
+
+        if (contentType != null) {
+            contentType = contentType.replaceAll(" ", "");
+        }
+
         if (method.equalsIgnoreCase(HttpMethod.GET.name()) || contentType.startsWith(ContentType.APPLICATION_X_WWW_FORM_URLENCODED.getValue())) {
             return new QueryStringReqParamHelper();
         } else if (contentType.startsWith(ContentType.APPLICATION_JSON.getValue())){

@@ -1,13 +1,12 @@
 package com.yeoman.minispring.support;
 
+import org.objectweb.asm.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-
-import com.yeoman.minispring.handler.DispatcherServlet;
-import jdk.internal.org.objectweb.asm.*;
 
 /**
  * @author 冯宇明
@@ -77,21 +76,5 @@ public class ScanParamHelper {
         return true;
     }
 
-    public static void main(String[] args) throws IOException {
-        Class c = DispatcherServlet.class;
-        Method[] methods = c.getDeclaredMethods();
-        Method method = null;
-        for (Method method1 : methods) {
-            if (method1.getName().equalsIgnoreCase("channelRead")){
-                method = method1;
-                break;
-            }
-        }
-
-        String[] ss = ScanParamHelper.getMethodParameterNamesByAsm4(c, method);
-        for (String s : ss) {
-            System.out.println(s);
-        }
-    }
 
 }
